@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -24,7 +23,7 @@ public class AuditService {
     private static final int USER_AGENT_MAX_LENGTH = 500;
 
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void recordUpload(Document document, User actor) {
         AuditLog entry = baseBuilder(document, actor, AuditAction.UPLOADED)
                 .newStatus(document.getStatus())
@@ -34,7 +33,7 @@ public class AuditService {
     }
 
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void recordStateChange(Document document, User actor,
                                   DocumentStatus oldStatus, DocumentStatus newStatus,
                                   String reason) {
@@ -49,7 +48,7 @@ public class AuditService {
     }
 
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void recordView(Document document, User actor) {
         AuditLog entry = baseBuilder(document, actor, AuditAction.VIEWED).build();
         auditLogRepository.save(entry);
