@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import com.pragyan.verifyhub.audit.AuditService;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class DocumentService {
     private final FileValidator fileValidator;
     private final FileHasher fileHasher;
     private final ExifStripper exifStripper;
+    private final AuditService auditService;
 
     private static final DateTimeFormatter DATE_DIR_FORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
@@ -69,7 +71,7 @@ public class DocumentService {
                 .documentType(documentType)
                 .originalFilename(sanitizedOriginal)
                 .storedFilename(storedFilename)
-                .filePath(relativePath.toString().replace('\\', '/'))  // store with forward slashes
+                .filePath(relativePath.toString().replace('\\', '/'))
                 .fileSizeBytes((long) cleanedBytes.length)
                 .mimeType(detectedMime)
                 .contentHash(contentHash)
@@ -79,7 +81,7 @@ public class DocumentService {
         Document saved = documentRepository.save(doc);
         log.info("Document {} uploaded by user {} (type {}, {} bytes)",
                 saved.getId(), user.getEmail(), documentType, saved.getFileSizeBytes());
-
+        auditService.recordUpload(saved, user);
         return saved;
     }
 
